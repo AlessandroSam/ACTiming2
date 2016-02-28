@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	ng-app="ACTiming2">
+<h:head>
+	<h:outputScript library="js" name="angular.min.js" />
+	<h:outputScript library="js" name="d3.js" />
+	<h:outputScript library="js" name="nv.d3.js" />
+	<h:outputScript library="js" name="angular-nvd3.js" />
+	<h:outputScript library="js" name="app.js" />
+	<h:outputStylesheet library="css" name="styles.css" />
+	<h:outputStylesheet library="css" name="nv.d3.css" />
+	<title>Список сессий</title>
+</h:head>
+<h:body>
+	<div class="header">
+	<h1>Список сессий</h1>
+	<p>По щелчку на строке откроется список пройденных кругов и появится график.</p>
+	<p>Лучшее время круга - <strong class="fastest">наименьшее</strong> - выделено цветом.</p>
+	<h:outputLink value="livetiming.xhtml">
+		<h:outputText value="Лайв-тайминг" />
+	</h:outputLink>
+	</div>
+	<div class="sessionListContent" ng-controller="sessionListCtrl">
+		<div class="sessions">
+			<!-- Здесь выведем таблицу сессий. По щелчку нужно получить и отобразить данные о кругах -->
+			<!-- dataTable - хорошо. Но хотелось бы иметь доступ к конкретным строкам -->
+			<table>
+				<tr>		
+					<th><h:outputText value="Дата" /></th>
+					<th><h:outputText value="Игрок" /></th>
+					<th><h:outputText value="Сессия" /></th>
+					<th><h:outputText value="Машина" /></th>
+					<th><h:outputText value="Трасса" /></th>
+				</tr>
+				<ui:repeat value="#{sessionListBean.sessionList}" var="sessions">
+					<tr data-id="#{sessions.sessionId}" 
+					 ng-click="rowClick(#{sessions.sessionId})"
+					 ng-class="{selected: #{sessions.sessionId} == selectedId}">
+						<td><h:outputText value="#{sessions.startTime}" /></td>
+						<td><h:outputText value="#{sessions.playerName}" /></td>
+						<td><h:outputText value="#{sessions.sessionDescr}" /></td>
+						<td><h:outputText value="#{sessions.car}" /></td>
+						<td><h:outputText value="#{sessions.track}" /></td>
+					</tr>
+				</ui:repeat>
+			</table>
+		</div>
+		<div ng-if="dataReceived" class="laps">
+			<!-- Данные для этого блока будут получены в виде JSON -->
+			<table class=".laptable">
+			<tr>
+				<th><h:outputText value="N" /></th>
+				<th><h:outputText value="Время" /></th>
+			</tr>		
+			<tr ng-repeat="lap in laps" 
+			    ng-class="{fastest: $index == bestLapIndex}">
+			<td>{{lap[0]}}</td>
+			<td>{{lap[1] | date:'m:ss.sss'}}</td>
+			</tr>
+			</table>
+		</div>
+		<div ng-if="dataReceived" class="plot-container">
+			<nvd3 options="plotOptions" data="plotData" class="with-3d-shadow with-transitions"></nvd3>
+		</div>
+	</div>
+</h:body>
+</html>
+
+<!-- 	
+	<div class="sessions" ng-controller="blah">
+		<h:dataTable value="#{sessionListBean.sessionList}" var="sessions">
+			<h:column>
+			  <f:facet name="id">ID</f:facet>
+			  #{sessions.sessionId}
+			</h:column>
+			<h:column pt:ng-click="alert('click!')">    				
+		      <f:facet name="header">Дата</f:facet>				
+		      #{sessions.startTime}
+		   </h:column>
+		   <h:column>    				
+		      <f:facet name="header">Имя игрока</f:facet>    				
+		      #{sessions.playerName}
+		   </h:column>
+		   <h:column>    				
+		      <f:facet name="header">Сессия</f:facet>    				
+		      #{sessions.sessionDescr}
+		   </h:column>
+		   <h:column>    				
+		      <f:facet name="header">Машина</f:facet>    				
+		      #{sessions.car}
+		   </h:column>
+		   <h:column>    				
+		      <f:facet name="header">Трасса</f:facet>    				
+		      #{sessions.track}
+		   </h:column>
+		   <h:column>
+		      <input type="button" ng-click="btnclick()" data-id="#{sessions.sessionId}" />
+		   </h:column>   
+		</h:dataTable>
+	</div>  -->

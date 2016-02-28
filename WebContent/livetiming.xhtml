@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      ng-app="liveTiming">
+<h:head>
+  <title><ui:insert name="title">Лайв-тайминг</ui:insert></title>
+  <h:outputStylesheet library="css" name="styles.css" />
+  <h:outputScript library="js" name="angular.min.js" />
+  <h:outputScript library="js" name="app-timing.js" />
+</h:head>
+
+<h:body>
+	<div id="timingContent" ng-controller="LiveTimingCtrl">
+		<div><p>Сессия: {{timingData.sessionString}}</p></div>
+		<!-- Основной блок с таблицей. Если сессии никакой нет, то не нужно ничего отображать. -->
+		<div ng-if="sessionOk">
+		<!-- Практика и квалификация ограничивается временем, гонка - кругами -->
+		<p ng-if="!isRace">Оставшееся время: {{timeLeftView | date:'m:ss'}}</p>
+		<p ng-if="isRace">Осталось кругов: {{lapsRemaining}}</p>
+		<table class="timing-table">
+			<tr>
+			<th class="number-col">P</th> <!-- Позиция -->
+			<th class="number-col">N</th> <!-- Внутриигровой ID -->
+			<th>ПИЛОТ</th>
+			<th>МАШИНА</th>
+			<th class="time-col">ПОСЛЕДНИЙ</th> <!-- Время последнего круга. Наиболее "свежие" времена выделяются. -->
+			<th class="time-col">ЛУЧШИЙ</th> <!-- Время лучшего круга -->
+			<th class="number-col">КРУГ</th> <!-- Количество пройденных кругов -->
+			<th class="time-col" ng-if="isRace">ОБЩЕЕ ВРЕМЯ</th> <!-- Общее время круга как сумма времён кругов в гонке -->
+			</tr>
+			<tr ng-repeat="car in timingData.cars" ng-class="{'lead-lap': isLeadLap(car.lapsCompleted)}">
+				<td class="number-col">{{$index+1}}</td>
+				<td class="number-col">{{car.carId}}</td>
+				<td>{{car.driverName}}</td>
+				<td>{{car.carName}}</td>
+				<td class="time-col" ng-class="{'recent-lap': isRecentLap(car.lapPostTime, car.lastLap)}">{{car.lastLap | date:'m:ss.sss'}}</td>
+				<td class="time-col">{{car.bestLap | date:'m:ss.sss'}}</td>
+				<td class="number-col">{{car.lapsCompleted}}</td>
+				<td class="time-col" ng-if="isRace">{{car.totalTime | date:'mm:ss.sss'}}</td>
+			</tr>
+		</table>
+		</div>
+	</div>
+</h:body>
+
+</html>
