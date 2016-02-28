@@ -19,6 +19,7 @@
 		<!-- Практика и квалификация ограничивается временем, гонка - кругами -->
 		<p ng-if="!isRace">Оставшееся время: {{timeLeftView | date:'m:ss'}}</p>
 		<p ng-if="isRace">Осталось кругов: {{lapsRemaining}}</p>
+		<p>ng-if="isRace>Лучшее время: Some Drivername - 1:23.456 на 7 круге)</p>
 		<table class="timing-table">
 			<tr>
 			<th class="number-col">P</th> <!-- Позиция -->
