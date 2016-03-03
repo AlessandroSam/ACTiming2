@@ -8,6 +8,8 @@ var UPDATE_INTERVAL = 1000; // интервал обновления данны�
 
 var RECENT_TIME_DELTA = 8000;
 
+// TODO: функционал по вычислению лучшего круга гонки должен быть на сервере
+
 liveTiming.controller('LiveTimingCtrl', ['$scope', '$interval', '$http', function($scope, $interval, $http) {
 	$interval(function() {
 		$http.get('/ACTiming2/live?brief=0').success(function(data) {
@@ -41,6 +43,26 @@ liveTiming.controller('LiveTimingCtrl', ['$scope', '$interval', '$http', functio
 				break;
 			}
 			}
+			if ($scope.isRace) {
+				/* Здесь установим лучший круг гонки.
+				 * Если завершён первый круг, то лучшее время круга равно времени круга лидера.
+				 * Если завершён не первый круг, то сравниваем все времена кругов (lastLap) с предыдущим лучшим;
+				 * если время улучшено, запоминаем данные. */
+				$scope.bestLapIndex = -1;  // Временный показатель. Равенство -1 означает, что лучшее время круга не было побито.
+				if (data.cars[0].lapsCompleted == 1) {  // FIXME Лидер может поменяться во время второго круга 
+					$scope.bestLap = data.cars[0].bestLap; 
+					$scope.bestLapIndex = 0;
+				} else if (data.cars[0].lapsCompleted > 1)
+					for (i = 0; i < data.cars.length; i++)
+						if (data.cars[i].bestLap != 0 && data.cars[i].bestLap < $scope.bestLap)
+							$scope.bestLapIndex = i;
+				if ($scope.bestLapIndex > -1) {
+					$scope.bestLap = data.cars[$scope.bestLapIndex].bestLap;
+					$scope.bestLapDriver = data.cars[$scope.bestLapIndex].driverName;
+					$scope.bestLapNumber = data.cars[$scope.bestLapIndex].lapsCompleted;
+				}
+				console.log("Race info: lap " + data.cars[0].lapsCompleted + "; bestLapIndex = " + $scope.bestLapIndex);
+			}
 		});
 	}, UPDATE_INTERVAL);
 	
@@ -53,6 +75,16 @@ liveTiming.controller('LiveTimingCtrl', ['$scope', '$interval', '$http', functio
 	// Возвращает true, пилот находится в одном круге с лидером. Имеет смысл только для гонки.
 	$scope.isLeadLap = function(lapNumber) {
 		return (lapNumber == $scope.timingData.cars[0].lapsCompleted) && $scope.timingData.session == RACE;
+	}
+	
+	$scope.isBestLap = function(lapTime) {
+		return lapTime != 0 && lapTime == $scope.bestLap;
+	}
+	
+	$scope.isBestLapAvailable = function() {
+		var result = $scope.isRace && $scope.timingData.cars[0].lapsCompleted > 0;
+		console.log("isBestLapAvailable: " + result);
+		return result;
 	}
 	
 }]);

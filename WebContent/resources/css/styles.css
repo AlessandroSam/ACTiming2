@@ -58,11 +58,16 @@ td {
 	border: none;
 }
 
+.timing-row {
+	height: 5px;  /* FIXME уменьшить высоту строк, сделав это по-человечески! */
+}
+
 /* Столбец со временем круга */
 .time-col {
 	width: 90px;
 	text-align: right;
 }
+
 
 /* Номера / ID / позиции */
 .number-col {
